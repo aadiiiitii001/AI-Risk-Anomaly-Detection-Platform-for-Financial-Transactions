@@ -9,3 +9,5 @@ joblib
 streamlit
 requests
 python-dotenv
+shap
+matplotlib
