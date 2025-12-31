@@ -1,0 +1,5 @@
+user_id,amount,merchant,country,timestamp
+101,2500,Amazon,IN,2024-11-21 10:15:00
+101,98000,CryptoX,SG,2024-11-21 10:16:30
+102,1200,Flipkart,IN,2024-11-21 11:20:00
+103,50000,Binance,AE,2024-11-21 11:25:00
