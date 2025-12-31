@@ -125,19 +125,16 @@ Database	PostgreSQL
 Dashboard	Streamlit
 DevOps	Docker, GitHub Actions
 Testing	Pytest
-🧩 Future Enhancements
 
-Risk rules engine (ML + business rules)
-
-Model versioning & monitoring
-
-Cloud deployment (AWS / Azure / GCP)
-
-Role-based access control
-
-Advanced analytics queries
+## 🧩 Future Enhancements
+- Risk rules engine (ML + business rules)
+- Model versioning & monitoring
+- Cloud deployment (AWS / Azure / GCP)
+- Role-based access control
+- Advanced analytics queries
 
 👩‍💻 Author
-
+---
 Aditi Nayak
 AI / ML | Backend | FinTech Systems
+---
