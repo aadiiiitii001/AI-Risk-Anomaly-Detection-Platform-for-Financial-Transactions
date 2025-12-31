@@ -10,3 +10,4 @@ streamlit
 requests
 python-dotenv
 shap matplotlib
+kafka-python
