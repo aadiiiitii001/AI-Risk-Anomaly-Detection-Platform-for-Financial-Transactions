@@ -81,41 +81,33 @@ financial-transactions
 http://localhost:8000/docs
 ```
 
-🧪 Testing & CI/CD
-Tests
+## 🧪 Testing & CI/CD
+# Tests
+- Feature engineering tests
+- ML model tests
+- API integration tests
 
-Feature engineering tests
-
-ML model tests
-
-API integration tests
-
-Run locally:
-
+## Run locally:
+``` bash
 pytest -v
+```
 
-GitHub Actions CI
-
-Runs on every push & PR
-
-Automatically installs dependencies
-
-Executes all tests
+## GitHub Actions CI
+- Runs on every push & PR
+- Automatically installs dependencies
+- Executes all tests
 
 ✔ Ensures reliability
 ✔ Prevents breaking changes
 
-📊 Use Cases
+## 📊 Use Cases
+- Fraud Detection
+- AML (Anti-Money Laundering)
+- Transaction Risk Scoring
+- Financial Compliance & Auditing
 
-Fraud Detection
-
-AML (Anti-Money Laundering)
-
-Transaction Risk Scoring
-
-Financial Compliance & Auditing
-
-🛠️ Tech Stack
+## 🛠️ Tech Stack
+``` bash
 Layer	Technology
 Backend	FastAPI
 ML	Scikit-learn
@@ -125,6 +117,7 @@ Database	PostgreSQL
 Dashboard	Streamlit
 DevOps	Docker, GitHub Actions
 Testing	Pytest
+``` 
 
 ## 🧩 Future Enhancements
 - Risk rules engine (ML + business rules)
@@ -134,7 +127,6 @@ Testing	Pytest
 - Advanced analytics queries
 
 👩‍💻 Author
----
 Aditi Nayak
-AI / ML | Backend | FinTech Systems
----
+AI / ML & Backend system
+Focused on secure, explainable AI for enterprise finance
