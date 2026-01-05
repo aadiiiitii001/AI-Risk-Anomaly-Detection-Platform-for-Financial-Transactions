@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from schemas import Transaction
+from api.schemas import Transaction
 from predict import predict_transaction
 
 app = FastAPI(title="AI Risk & Anomaly Detection Platform")
