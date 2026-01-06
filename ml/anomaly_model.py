@@ -9,7 +9,7 @@ class AnomalyDetector:
             contamination=0.02,
             random_state=42
         )
-        self.explainer = None  # DO NOT initialize here
+        self.explainer = None
 
     def train(self, X):
         self.model.fit(X)
@@ -22,7 +22,6 @@ class AnomalyDetector:
 
     def explain(self, X):
         if self.explainer is None:
-            # Model must already be trained or loaded
             self.explainer = shap.TreeExplainer(self.model)
         return self.explainer.shap_values(X)
 
@@ -32,3 +31,4 @@ class AnomalyDetector:
     def load(self, path="ml/model.joblib"):
         self.model = joblib.load(path)
         self.explainer = shap.TreeExplainer(self.model)
+
