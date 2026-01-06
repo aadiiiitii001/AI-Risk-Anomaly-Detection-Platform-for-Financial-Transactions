@@ -1,30 +1,34 @@
 from sklearn.ensemble import IsolationForest
+import joblib
 import shap
 
 class AnomalyDetector:
     def __init__(self):
         self.model = IsolationForest(
-            n_estimators=100,
-            contamination=0.05,
+            n_estimators=200,
+            contamination=0.02,
             random_state=42
         )
-        self.explainer = shap.TreeExplainer(self.model)
-        self.is_trained = False
+        self.explainer = None  # DO NOT initialize here
 
     def train(self, X):
         self.model.fit(X)
         self.explainer = shap.TreeExplainer(self.model)
-        self.is_trained = True
 
     def predict(self, X):
-        if not self.is_trained:
-            # Fit on first batch (cold start)
-            self.train(X)
         scores = self.model.decision_function(X)
         anomalies = self.model.predict(X)
         return scores, anomalies
 
     def explain(self, X):
-        if not self.is_trained:
-            self.train(X)
+        if self.explainer is None:
+            # Model must already be trained or loaded
+            self.explainer = shap.TreeExplainer(self.model)
         return self.explainer.shap_values(X)
+
+    def save(self, path="ml/model.joblib"):
+        joblib.dump(self.model, path)
+
+    def load(self, path="ml/model.joblib"):
+        self.model = joblib.load(path)
+        self.explainer = shap.TreeExplainer(self.model)
