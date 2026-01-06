@@ -5,20 +5,17 @@ from db.models import Transaction
 from db.database import SessionLocal
 
 model = AnomalyDetector()
-model.load()
 
 def predict_and_store(data):
     df = pd.DataFrame([data])
     df = create_features(df)
 
     X = df[FEATURES]
-    score, anomaly = model.predict(X)
 
+    score, anomaly = model.predict(X)
     shap_values = model.explain(X)[0]
 
-    explanation = dict(
-        zip(FEATURES, shap_values.tolist())
-    )
+    explanation = dict(zip(FEATURES, shap_values.tolist()))
 
     db = SessionLocal()
     tx = Transaction(
