@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from api.schemas import Transaction
-from api.predict import predict_transaction
+from api.predict import predict_and_store
 from db.database import engine
 from db.models import Base
 
@@ -13,4 +13,4 @@ def startup_event():
 
 @app.post("/predict")
 def predict(tx: Transaction):
-    return predict_transaction(tx.dict())
+    return predict_and_store(tx.dict())
