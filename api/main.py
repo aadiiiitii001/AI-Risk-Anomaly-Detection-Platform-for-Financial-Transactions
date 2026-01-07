@@ -6,7 +6,7 @@ from db.models import Base
 
 app = FastAPI(title="AI Risk & Anomaly Detection Platform")
 
-# ✅ Ensure SQLite tables are created on startup
+# Ensure SQLite tables are created on startup
 @app.on_event("startup")
 def startup_event():
     Base.metadata.create_all(bind=engine)
