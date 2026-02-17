@@ -179,6 +179,8 @@ pytest -v
 - Dashboard: Streamlit
 - Containerization: Docker
 ```
+### Screenshot
+<img width="1920" height="1080" alt="Screenshot (43)" src="https://github.com/user-attachments/assets/e6358621-464b-4b70-8716-c07716053143" />
 
 ## 👩‍💻 Author
 ```
