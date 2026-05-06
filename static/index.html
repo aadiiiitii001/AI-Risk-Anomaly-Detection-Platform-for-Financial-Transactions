@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Risk & Anomaly Detection Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --surface: #111418;
+    --surface2: #181c22;
+    --surface3: #1f242d;
+    --border: rgba(255,255,255,0.06);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0;
+    --text2: #7a8499;
+    --text3: #4a5268;
+    --red: #ff4d4d;
+    --red-dim: rgba(255,77,77,0.12);
+    --red-mid: rgba(255,77,77,0.25);
+    --green: #00d97e;
+    --green-dim: rgba(0,217,126,0.1);
+    --amber: #ffb020;
+    --amber-dim: rgba(255,176,32,0.1);
+    --blue: #4d9eff;
+    --blue-dim: rgba(77,158,255,0.1);
+    --accent: #ff4d4d;
+    --font-mono: 'Space Mono', monospace;
+    --font-sans: 'DM Sans', sans-serif;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+ 
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 14px; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+ 
+  /* ── TOPBAR ─────────────────────────────────── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; height: 58px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  .logo {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--red); display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #fff; flex-shrink: 0;
+  }
+  .brand-name { font-family: var(--font-mono); font-size: 13px; color: var(--text); letter-spacing: 0.02em; }
+  .brand-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .live-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--green-dim); border: 1px solid rgba(0,217,126,0.2);
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 11px; color: var(--green); font-family: var(--font-mono);
+  }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.8s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .topbar-date {
+    font-size: 11px; color: var(--text3); font-family: var(--font-mono);
+    border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 4px 10px;
+  }
+ 
+  /* ── LAYOUT ─────────────────────────────────── */
+  .main { padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+ 
+  /* ── METRIC CARDS ───────────────────────────── */
+  .metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .metric {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .metric:hover { border-color: var(--border2); }
+  .metric::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .metric.red::before { background: var(--red); }
+  .metric.green::before { background: var(--green); }
+  .metric.amber::before { background: var(--amber); }
+  .metric.blue::before { background: var(--blue); }
+  .metric-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; margin-bottom: 12px;
+  }
+  .metric.red .metric-icon { background: var(--red-dim); color: var(--red); }
+  .metric.green .metric-icon { background: var(--green-dim); color: var(--green); }
+  .metric.amber .metric-icon { background: var(--amber-dim); color: var(--amber); }
+  .metric.blue .metric-icon { background: var(--blue-dim); color: var(--blue); }
+  .metric-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .metric-value { font-family: var(--font-mono); font-size: 28px; color: var(--text); font-weight: 700; }
+  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 5px; }
+  .metric-sub.up { color: var(--green); }
+  .metric-sub.dn { color: var(--red); }
+ 
+  /* ── CARDS ──────────────────────────────────── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+  }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-title {
+    font-size: 13px; font-weight: 500; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono);
+  }
+  .card-title-icon {
+    width: 24px; height: 24px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface3); font-size: 13px;
+  }
+  .card-action {
+    font-size: 11px; color: var(--text3); cursor: pointer;
+    background: none; border: 1px solid var(--border2); border-radius: var(--radius-sm);
+    padding: 4px 10px; color: var(--text2);
+    transition: all 0.15s; font-family: var(--font-sans);
+  }
+  .card-action:hover { background: var(--surface3); color: var(--text); }
+ 
+  /* ── GRID LAYOUTS ───────────────────────────── */
+  .row { display: grid; gap: 20px; }
+  .row-3-1 { grid-template-columns: 3fr 1fr; }
+  .row-2 { grid-template-columns: 1fr 1fr; }
+  .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+ 
+  /* ── TABLE ──────────────────────────────────── */
+  .txn-table { width: 100%; border-collapse: collapse; }
+  .txn-table th {
+    text-align: left; padding: 8px 12px;
+    font-size: 10px; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    font-weight: 400; border-bottom: 1px solid var(--border);
+  }
+  .txn-table td {
+    padding: 11px 12px; font-size: 12px; color: var(--text);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .txn-table tr:last-child td { border-bottom: none; }
+  .txn-table tr:hover td { background: var(--surface2); }
+ 
+  /* ── BADGES ─────────────────────────────────── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 4px;
+    font-size: 10px; font-family: var(--font-mono); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .badge-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,77,77,0.2); }
+  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,217,126,0.2); }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(77,158,255,0.2); }
+  .badge-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(255,176,32,0.2); }
+ 
+  /* ── RISK BAR ───────────────────────────────── */
+  .risk-wrap { display: flex; align-items: center; gap: 8px; }
+  .risk-track { flex: 1; height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+  .risk-fill { height: 100%; border-radius: 2px; }
+  .risk-num { font-family: var(--font-mono); font-size: 11px; min-width: 38px; }
+ 
+  /* ── SHAP BARS ──────────────────────────────── */
+  .shap-feature { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .shap-name { font-size: 12px; color: var(--text2); width: 140px; flex-shrink: 0; font-family: var(--font-mono); }
+  .shap-bar-wrap { flex: 1; display: flex; align-items: center; gap: 6px; }
+  .shap-bar { height: 18px; border-radius: 3px; min-width: 3px; transition: width 0.5s ease; }
+  .shap-bar-pos { background: linear-gradient(90deg, #ff4d4d, #ff7070); }
+  .shap-bar-neg { background: linear-gradient(90deg, #00b56a, #00d97e); }
+  .shap-val { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
+ 
+  /* ── LIVE FEED ──────────────────────────────── */
+  .feed-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .feed-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .feed-dot {
+    width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
+  }
+  .feed-text { font-size: 12px; color: var(--text); line-height: 1.5; }
+  .feed-time { font-size: 10px; color: var(--text3); margin-top: 2px; font-family: var(--font-mono); }
+ 
+  /* ── KAFKA STATUS ───────────────────────────── */
+  .kafka-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12px;
+  }
+  .kafka-row:last-child { border-bottom: none; }
+  .kafka-key { color: var(--text3); }
+  .kafka-val { color: var(--text); font-family: var(--font-mono); font-size: 11px; }
+ 
+  /* ── API PANEL ──────────────────────────────── */
+  .code-block {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 16px;
+    font-family: var(--font-mono); font-size: 11px; color: var(--text2);
+    line-height: 1.8; overflow-x: auto; white-space: pre;
+  }
+  .code-label {
+    font-size: 10px; color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.07em; margin-bottom: 8px;
+  }
+  .key { color: #6b9fff; }
+  .str { color: #f0a36c; }
+  .num { color: #7fd96b; }
+  .bool { color: var(--red); }
+ 
+  /* ── SECTION SEPARATOR ──────────────────────── */
+  .section-label {
+    font-size: 10px; color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.1em; font-family: var(--font-mono);
+    display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+ 
+  /* ── CHART LEGEND ───────────────────────────── */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    margin-bottom: 10px; font-size: 11px; color: var(--text3);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-swatch { width: 10px; height: 10px; border-radius: 2px; }
+ 
+  /* ── SCROLLBAR ──────────────────────────────── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+ 
+  /* ── FOOTER ─────────────────────────────────── */
+  .footer {
+    padding: 18px 28px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; color: var(--text3); font-family: var(--font-mono);
+  }
+</style>
+</head>
+<body>
+ 
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo">⚡</div>
+    <div>
+      <div class="brand-name">AI Risk & Anomaly Detection</div>
+      <div class="brand-sub">Isolation Forest · SHAP · Kafka · FastAPI</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-pill"><span class="live-dot"></span>LIVE · Kafka streaming</div>
+    <div class="topbar-date">2024-11-21 · 10:16:30 UTC</div>
+  </div>
+</header>
+ 
+<main class="main">
+ 
+  <!-- METRICS -->
+  <div class="section-label">System overview</div>
+  <div class="metrics-row">
+    <div class="metric blue">
+      <div class="metric-icon">📊</div>
+      <div class="metric-label">Total transactions</div>
+      <div class="metric-value">14,832</div>
+      <div class="metric-sub up">↑ +2.3% today</div>
+    </div>
+    <div class="metric red">
+      <div class="metric-icon">⚠</div>
+      <div class="metric-label">Anomalies flagged</div>
+      <div class="metric-value">297</div>
+      <div class="metric-sub dn">2.0% contamination rate</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-icon">✓</div>
+      <div class="metric-label">Model accuracy</div>
+      <div class="metric-value">97.4%</div>
+      <div class="metric-sub up">Isolation Forest · sklearn</div>
+    </div>
+    <div class="metric amber">
+      <div class="metric-icon">⚡</div>
+      <div class="metric-label">Avg inference</div>
+      <div class="metric-value">12ms</div>
+      <div class="metric-sub">FastAPI · uvicorn</div>
+    </div>
+  </div>
+ 
+  <!-- TRANSACTION TABLE + LIVE FEED -->
+  <div class="section-label">Transaction monitoring</div>
+  <div class="row row-3-1">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-title-icon">📋</div>Recent transactions</div>
+        <button class="card-action">View all →</button>
+      </div>
+      <table class="txn-table">
+        <thead>
+          <tr>
+            <th>Txn ID</th>
+            <th>User</th>
+            <th>Amount</th>
+            <th>Merchant</th>
+            <th>Country</th>
+            <th>Risk score</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="txn-body"></tbody>
+      </table>
+    </div>
+ 
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-title-icon">📡</div>Live feed</div>
+      </div>
+      <div id="live-feed"></div>
+    </div>
+  </div>
+ 
+  <!-- CHARTS ROW 1 -->
+  <div class="section-label">Analytics</div>
+  <div class="row row-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-title-icon">📉</div>Anomaly score distribution</div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch" style="background:#ff4d4d;"></div>Anomaly zone (&lt; −0.2)</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#00d97e;"></div>Normal zone</div>
+      </div>
+      <div style="position:relative;width:100%;height:200px;">
+        <canvas id="distChart" role="img" aria-label="Histogram of isolation forest anomaly scores from -0.5 to 0.4, showing anomalies in red below -0.2 and normal transactions in green above.">Score distribution: most transactions score 0.1–0.3, anomalies cluster below -0.2.</canvas>
+      </div>
+    </div>
+ 
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-title-icon">🕐</div>Anomalies by hour</div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch" style="background:#ff4d4d;"></div>Flagged transactions per hour</div>
+      </div>
+      <div style="position:relative;width:100%;height:200px;">
+        <canvas id="hourChart" role="img" aria-label="Line chart of anomaly frequency per hour, showing spikes at midnight and midday.">Anomaly spikes: hours 0–3 and 12.</canvas>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- SHAP + COUNTRY + KAFKA -->
+  <div class="row row-3">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-title-icon">🧠</div>SHAP explanation</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-family:var(--font-mono);">TXN #12 · user_id: 101</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span class="badge badge-red">⚠ Anomaly</span>
+          <span style="font-family:var(--font-mono);font-size:12px;color:var(--text2);">risk_score: <span style="color:var(--red);">−0.42</span></span>
+          <span style="font-size:11px;color:var(--text3);">$98,000 · CryptoX · SG</span>
+        </div>
+      </div>
+      <div id="shap-bars"></div>
+      <div style="display:flex;gap:14px;margin-top:14px;font-size:11px;color:var(--text3);">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--red);"></span>Toward anomaly</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--green);"></span>Toward normal</span>
+      </div>
+    </div>
+ 
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-title-icon">🌍</div>Anomalies by country</div>
+      </div>
+      <div style="position:relative;width:100%;height:220px;">
+        <canvas id="countryChart" role="img" aria-label="Horizontal bar chart of anomaly counts by country. SG leads with 87, followed by NG 63, RU 45.">Country anomaly counts: SG 87, NG 63, RU 45, CN 38, BR 29, US 18, GB 12.</canvas>
+      </div>
+    </div>
+ 
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-title-icon">⚙</div>Kafka status</div>
+      </div>
+      <div class="kafka-row"><span class="kafka-key">Topic</span><span class="kafka-val badge badge-blue">financial-transactions</span></div>
+      <div class="kafka-row"><span class="kafka-key">Producer</span><span class="kafka-val"><span class="badge badge-green">● RUNNING</span></span></div>
+      <div class="kafka-row"><span class="kafka-key">Consumer</span><span class="kafka-val"><span class="badge badge-green">● RUNNING</span></span></div>
+      <div class="kafka-row"><span class="kafka-key">Messages/min</span><span class="kafka-val">~140</span></div>
+      <div class="kafka-row"><span class="kafka-key">DB Backend</span><span class="kafka-val">SQLite / PostgreSQL</span></div>
+      <div class="kafka-row"><span class="kafka-key">ORM</span><span class="kafka-val">SQLAlchemy</span></div>
+      <div class="kafka-row"><span class="kafka-key">Explainability</span><span class="kafka-val">SHAP TreeExplainer</span></div>
+      <div class="kafka-row"><span class="kafka-key">ML Model</span><span class="kafka-val">IsolationForest 2%</span></div>
+    </div>
+  </div>
+ 
+  <!-- API PANEL -->
+  <div class="section-label">API reference — POST /predict</div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><div class="card-title-icon">🔌</div>FastAPI inference endpoint</div>
+      <div style="display:flex;gap:8px;">
+        <span class="badge badge-green">200 OK</span>
+        <span class="badge badge-blue">POST /predict</span>
+        <span style="font-size:11px;color:var(--text3);padding:3px 0;">http://localhost:8000/docs</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div>
+        <div class="code-label">Request body</div>
+        <div class="code-block"><span class="key">{
+  "user_id"</span>: <span class="num">101</span>,
+  <span class="key">"amount"</span>: <span class="num">98000</span>,
+  <span class="key">"merchant"</span>: <span class="str">"CryptoX"</span>,
+  <span class="key">"country"</span>: <span class="str">"SG"</span>,
+  <span class="key">"timestamp"</span>: <span class="str">"2024-11-21T10:16:30"</span>
+}</div>
+      </div>
+      <div>
+        <div class="code-label">Response</div>
+        <div class="code-block"><span class="key">{
+  "transaction_id"</span>: <span class="num">12</span>,
+  <span class="key">"risk_score"</span>: <span class="num">-0.42</span>,
+  <span class="key">"anomaly"</span>: <span class="bool">true</span>,
+  <span class="key">"explanation"</span>: {
+    <span class="key">"amount_log"</span>: <span class="num">0.31</span>,
+    <span class="key">"transaction_hour"</span>: <span class="num">-0.04</span>,
+    <span class="key">"velocity"</span>: <span class="num">0.22</span>
+  }
+}</div>
+      </div>
+    </div>
+  </div>
+ 
+</main>
+ 
+<footer class="footer">
+  <span>AI Risk & Anomaly Detection Platform · Aditi Nayak</span>
+  <span>Model: IsolationForest · SHAP · FastAPI · Kafka · SQLAlchemy</span>
+  <span>Swagger UI: localhost:8000/docs</span>
+</footer>
+ 
+<script>
+  /* ── TRANSACTION TABLE ─────────────────────── */
+  const txns = [
+    { id: 12, user: 101, amount: '$98,000', merchant: 'CryptoX', country: 'SG', score: -0.42, anomaly: true },
+    { id: 11, user: 203, amount: '$1,240', merchant: 'Amazon', country: 'US', score: 0.18, anomaly: false },
+    { id: 10, user: 88, amount: '$55,000', merchant: 'WireNG', country: 'NG', score: -0.31, anomaly: true },
+    { id: 9, user: 314, amount: '$320', merchant: 'Starbucks', country: 'GB', score: 0.21, anomaly: false },
+    { id: 8, user: 77, amount: '$12,800', merchant: 'BitVault', country: 'RU', score: -0.27, anomaly: true },
+    { id: 7, user: 502, amount: '$89', merchant: 'Netflix', country: 'US', score: 0.30, anomaly: false },
+  ];
+ 
+  const tbody = document.getElementById('txn-body');
+  txns.forEach(t => {
+    const pct = Math.min(100, Math.round((Math.abs(t.score) / 0.5) * 100));
+    const barColor = t.anomaly ? '#ff4d4d' : '#00d97e';
+    const scoreColor = t.anomaly ? '#ff4d4d' : '#00d97e';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-family:var(--font-mono);color:var(--text3);">#${t.id}</td>
+      <td>${t.user}</td>
+      <td style="font-weight:500;">${t.amount}</td>
+      <td>${t.merchant}</td>
+      <td><span class="badge badge-blue">${t.country}</span></td>
+      <td>
+        <div class="risk-wrap">
+          <div class="risk-track"><div class="risk-fill" style="width:${pct}%;background:${barColor};"></div></div>
+          <span class="risk-num" style="color:${scoreColor};">${t.score}</span>
+        </div>
+      </td>
+      <td>${t.anomaly
+        ? '<span class="badge badge-red">⚠ Anomaly</span>'
+        : '<span class="badge badge-green">✓ Normal</span>'
+      }</td>
+    `;
+    tbody.appendChild(tr);
+  });
+ 
+  /* ── LIVE FEED ─────────────────────────────── */
+  const feedData = [
+    { dot: '#ff4d4d', text: 'Txn #12 flagged — $98,000 to CryptoX (SG)', time: '10:16:30' },
+    { dot: '#00d97e', text: 'Txn #11 cleared — $1,240 Amazon (US)', time: '10:15:48' },
+    { dot: '#ff4d4d', text: 'Txn #10 flagged — $55,000 WireNG (NG)', time: '10:14:22' },
+    { dot: '#00d97e', text: 'Txn #9 cleared — $320 Starbucks (GB)', time: '10:13:55' },
+    { dot: '#ff4d4d', text: 'Txn #8 flagged — $12,800 BitVault (RU)', time: '10:12:10' },
+  ];
+  const feed = document.getElementById('live-feed');
+  feedData.forEach(f => {
+    feed.innerHTML += `
+      <div class="feed-item">
+        <div class="feed-dot" style="background:${f.dot};"></div>
+        <div>
+          <div class="feed-text">${f.text}</div>
+          <div class="feed-time">${f.time} UTC</div>
+        </div>
+      </div>`;
+  });
+ 
+  /* ── SHAP BARS ─────────────────────────────── */
+  const shapFeatures = [
+    { name: 'amount_log', val: 0.31, dir: 1 },
+    { name: 'velocity', val: 0.22, dir: 1 },
+    { name: 'transaction_hour', val: -0.04, dir: -1 },
+  ];
+  const maxShap = 0.35;
+  const shapDiv = document.getElementById('shap-bars');
+  shapFeatures.forEach(f => {
+    const pct = Math.round((Math.abs(f.val) / maxShap) * 100);
+    const cls = f.dir > 0 ? 'shap-bar-pos' : 'shap-bar-neg';
+    shapDiv.innerHTML += `
+      <div class="shap-feature">
+        <div class="shap-name">${f.name}</div>
+        <div class="shap-bar-wrap">
+          <div class="shap-bar ${cls}" style="width:${pct}%;"></div>
+          <span class="shap-val">${f.val > 0 ? '+' : ''}${f.val}</span>
+        </div>
+      </div>`;
+  });
+ 
+  /* ── CHARTS ────────────────────────────────── */
+  const gridColor = 'rgba(255,255,255,0.05)';
+  const tickColor = '#4a5268';
+ 
+  new Chart(document.getElementById('distChart'), {
+    type: 'bar',
+    data: {
+      labels: ['-0.5','-0.4','-0.3','-0.2','-0.1','0.0','0.1','0.2','0.3','0.4'],
+      datasets: [{
+        label: 'Transactions',
+        data: [18, 42, 67, 98, 210, 890, 3420, 2100, 890, 340],
+        backgroundColor: (ctx) => ctx.dataIndex <= 3 ? 'rgba(255,77,77,0.7)' : 'rgba(0,217,126,0.6)',
+        borderWidth: 0, borderRadius: 3,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: tickColor, font: { size: 10, family: 'Space Mono' } }, grid: { color: gridColor } },
+        y: { ticks: { color: tickColor, font: { size: 10, family: 'Space Mono' } }, grid: { color: gridColor } }
+      }
+    }
+  });
+ 
+  new Chart(document.getElementById('hourChart'), {
+    type: 'line',
+    data: {
+      labels: ['00','02','04','06','08','10','12','14','16','18','20','22'],
+      datasets: [{
+        label: 'Anomalies',
+        data: [28,34,19,8,5,12,22,10,6,9,16,21],
+        borderColor: '#ff4d4d',
+        backgroundColor: 'rgba(255,77,77,0.08)',
+        fill: true, tension: 0.4, pointRadius: 4,
+        pointBackgroundColor: '#ff4d4d', pointBorderColor: '#0a0c0f', pointBorderWidth: 2,
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: tickColor, font: { size: 10, family: 'Space Mono' } }, grid: { color: gridColor } },
+        y: { ticks: { color: tickColor, font: { size: 10, family: 'Space Mono' } }, grid: { color: gridColor } }
+      }
+    }
+  });
+ 
+  new Chart(document.getElementById('countryChart'), {
+    type: 'bar',
+    data: {
+      labels: ['SG','NG','RU','CN','BR','US','GB'],
+      datasets: [{
+        label: 'Anomalies',
+        data: [87,63,45,38,29,18,12],
+        backgroundColor: [
+          'rgba(255,77,77,0.85)','rgba(255,77,77,0.72)','rgba(255,77,77,0.60)',
+          'rgba(255,77,77,0.50)','rgba(255,77,77,0.40)','rgba(255,77,77,0.30)','rgba(255,77,77,0.22)'
+        ],
+        borderWidth: 0, borderRadius: 4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: tickColor, font: { size: 10, family: 'Space Mono' } }, grid: { color: gridColor } },
+        y: { ticks: { color: '#e8eaf0', font: { size: 11, family: 'Space Mono' } }, grid: { display: false } }
+      }
+    }
+  });
+</script>
+</body>
+</html>
